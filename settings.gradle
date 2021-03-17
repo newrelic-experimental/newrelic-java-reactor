@@ -9,5 +9,4 @@ git {
 }
 rootProject.name = 'java-instrumentation-template'
 include 'reactor-core-3.1'
-include 'reactor-core-3.3'
 include 'reactor-finder'

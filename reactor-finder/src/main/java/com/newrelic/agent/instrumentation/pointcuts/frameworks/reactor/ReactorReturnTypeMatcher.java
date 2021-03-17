@@ -9,10 +9,11 @@ public class ReactorReturnTypeMatcher extends ManyMethodMatcher {
 	
 	private static MethodMatcher monoReturnMatcher = new MonoReturnMethodMatcher();
 	private static MethodMatcher fluxReturnMatcher = new FluxReturnMethodMatcher();
+	private static MethodMatcher publisherReturnMatcher = new PublisherReturnMethodMatcher();
 
 
 	public ReactorReturnTypeMatcher() {
-		super(monoReturnMatcher,fluxReturnMatcher);
+		super(monoReturnMatcher,fluxReturnMatcher, publisherReturnMatcher);
 	}
 
 	@Override
@@ -21,6 +22,9 @@ public class ReactorReturnTypeMatcher extends ManyMethodMatcher {
 			return true;
 		}
 		if(fluxReturnMatcher.matches(access, name, desc, annotations)) {
+			return true;
+		}
+		if(publisherReturnMatcher.matches(access, name, desc, annotations)) {
 			return true;
 		}
 		return false;
