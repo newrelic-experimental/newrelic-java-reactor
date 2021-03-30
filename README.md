@@ -1,24 +1,33 @@
 [![New Relic Experimental header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Experimental.png)](https://opensource.newrelic.com/oss-category/#new-relic-experimental)
 
-# [Project Name - use format "newrelic-java-<name>"] [build badges go here when available]
+# New Relic Java Agent Instrumentation for Java Reactor
 
->[Brief description - what is the project and value does it provide? How often should users expect to get releases? How is versioning set up? Where does this project want to go?]
-
+New Relic Java Agent instrumentation for the Reactor Framework (https://projectreactor.io/)
 ## Installation
+   
+To install:
 
-> [Include a step-by-step procedure on how to get your code installed. Be sure to include any third-party dependencies that need to be installed separately]
-
+1. Download the latest release jar files.
+2. In the New Relic Java directory (the one containing newrelic.jar), create a directory named extensions if it does not already exist.
+3. Copy the downloaded jars into the extensions directory.
+4. Restart the application.
 ## Getting Started
 
->[Simple steps to start working with the software similar to a "Hello World"]
-
-## Usage
-
->[**Optional** - Include more thorough instructions on how to use the software. This section might not be needed if the Getting Started section is enough. Remove this section if it's not needed.]
-
+Once installed the instrumentation will track both the Mono and Flux Reactor objects.   
+For Mono objects, it will track the object from subscription to completion (onCompl
+   
 ## Building
 
->[**Optional** - Include this section if users will need to follow specific instructions to build the software from source. Be sure to include any third party build dependencies that need to be installed separately. Remove this section if it's not needed.]
+Building the extension requires that Gradle is installed.
+To build the extension jars from source, follow these steps:
+### Build single extension
+To build a single extension with name *extension*, do the following:
+1. Set an environment variable *NEW_RELIC_EXTENSIONS_DIR* and set its value to the directory where you want the jar file built.
+2. Run the command: gradlew *extension*:clean *extension*:install
+### Build all extensions
+To build all extensions, do the following:
+1. Set an environment variable *NEW_RELIC_EXTENSIONS_DIR* and set its value to the directory where you want the jar file built.
+2. Run the command: gradlew clean install
 
 ## Testing
 
