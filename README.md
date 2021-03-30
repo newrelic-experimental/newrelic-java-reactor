@@ -13,8 +13,7 @@ To install:
 4. Restart the application.
 ## Getting Started
 
-Once installed the instrumentation will track both the Mono and Flux Reactor objects.   
-For Mono objects, it will track the object from subscription to completion (onCompl
+Once installed the instrumentation will track when a Mono or Flux object is placed on a scheduler for either the subscribe or the observe (or both).  The reactor finder extension instruments methods which return a Mono or a Flux object except these classes in the Reactor framework.
    
 ## Building
 
