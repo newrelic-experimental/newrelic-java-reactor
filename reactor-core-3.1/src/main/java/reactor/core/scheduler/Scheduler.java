@@ -3,11 +3,11 @@ package reactor.core.scheduler;
 import java.util.concurrent.TimeUnit;
 
 import com.newrelic.api.agent.NewRelic;
-import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
+import com.nr.instrumentation.reactor.NRReactorHeaders;
 import com.nr.instrumentation.reactor.NRRunnableWrapper;
 
 import reactor.core.Disposable;
@@ -18,13 +18,12 @@ public abstract class Scheduler {
 	@Trace
 	public Disposable schedule(Runnable task) {
 		if(!(task instanceof NRRunnableWrapper)) {
-			Token t = NewRelic.getAgent().getTransaction().getToken();
-			if(t != null && t.isActive()) {
-				NRRunnableWrapper wrapper = new NRRunnableWrapper(task, t);
+			NRReactorHeaders nrHeaders = new NRReactorHeaders();
+			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(nrHeaders);
+
+			if(!nrHeaders.isEmpty()) {
+				NRRunnableWrapper wrapper = new NRRunnableWrapper(task, nrHeaders);
 				task = wrapper;
-			} else if(t != null) {
-				t.expire();
-				t = null;
 			}
 		}
 		return Weaver.callOriginal();
@@ -35,13 +34,12 @@ public abstract class Scheduler {
 		
 		public Disposable schedule(Runnable task) {
 			if(!(task instanceof NRRunnableWrapper)) {
-				Token t = NewRelic.getAgent().getTransaction().getToken();
-				if(t != null && t.isActive()) {
-					NRRunnableWrapper wrapper = new NRRunnableWrapper(task, t);
+				NRReactorHeaders nrHeaders = new NRReactorHeaders();
+				NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(nrHeaders);
+
+				if(!nrHeaders.isEmpty()) {
+					NRRunnableWrapper wrapper = new NRRunnableWrapper(task, nrHeaders);
 					task = wrapper;
-				} else if(t != null) {
-					t.expire();
-					t = null;
 				}
 			}
 			return Weaver.callOriginal();
@@ -49,13 +47,12 @@ public abstract class Scheduler {
 		
 		public Disposable schedule(Runnable task, long delay, TimeUnit unit) {
 			if(!(task instanceof NRRunnableWrapper)) {
-				Token t = NewRelic.getAgent().getTransaction().getToken();
-				if(t != null && t.isActive()) {
-					NRRunnableWrapper wrapper = new NRRunnableWrapper(task, t);
+				NRReactorHeaders nrHeaders = new NRReactorHeaders();
+				NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(nrHeaders);
+
+				if(!nrHeaders.isEmpty()) {
+					NRRunnableWrapper wrapper = new NRRunnableWrapper(task, nrHeaders);
 					task = wrapper;
-				} else if(t != null) {
-					t.expire();
-					t = null;
 				}
 			}
 			return Weaver.callOriginal();
