@@ -9,7 +9,6 @@ public class NRRunnableWrapper implements Runnable {
 	
 	private Runnable delegate = null;
 	
-	//private Token token = null;
 	private NRReactorHeaders headers;
 	private static boolean isTransformed = false;
 	

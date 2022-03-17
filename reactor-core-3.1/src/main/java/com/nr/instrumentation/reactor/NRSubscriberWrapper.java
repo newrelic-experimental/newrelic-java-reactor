@@ -6,7 +6,6 @@ import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.Transaction;
-import com.newrelic.api.agent.TransportType;
 
 import reactor.core.CoreSubscriber;
 import reactor.core.Fuseable;
@@ -16,13 +15,13 @@ import reactor.core.Scannable;
 public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscription<T> {
 
 	private CoreSubscriber<T> actual = null;
-	
+
 	private static boolean isTransformed = false;
 
 	private Subscription subscription = null;
 
 	private NRReactorHeaders headers = null;
-	
+
 	private String name = null;
 
 	public NRSubscriberWrapper(CoreSubscriber<T> sub, Scannable s) {
@@ -38,89 +37,61 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 		if (transaction != null) {
 			transaction.insertDistributedTraceHeaders(headers);
 		}
-		
+
 	}
 
 	@Override
-	@Trace(dispatcher=true)
 	public void onNext(T t) {
-		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","CoreSubscriber",name,"onNext");
-		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
-			if (headers != null && !headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
-			} else {
-				transaction.ignore();
-			}
+		if(!ReactorUtils.activeTransaction()) {
+			ReactorDispatcher.startOnNextTransaction(name, actual, t, headers);
+		} else {
+			actual.onNext(t);
 		}
-
-		actual.onNext(t);
 	}
 
 	@Override
-	@Trace(dispatcher=true)
 	public void onError(Throwable t) {
-		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","CoreSubscriber",name,"onError");
-		NewRelic.noticeError(t);
-		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
-			if (headers != null && !headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
-			} else {
-				transaction.ignore();
-			}
+		if(!ReactorUtils.activeTransaction()) {
+			ReactorDispatcher.startOnErrorTransaction(name, actual, headers,t);
+		} else {
+			ReactorUtils.deActivate();
+			actual.onError(t);
 		}
-		actual.onError(t);
 	}
 
 	@Override
-	@Trace(dispatcher=true)
 	public void onComplete() {
-		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","CoreSubscriber",name,"onComplete");
-		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
-			if (headers != null && !headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
-			} else {
-				transaction.ignore();
-			}
+		if(!ReactorUtils.activeTransaction()) {
+			ReactorDispatcher.startOnCompleteTransaction(name, actual, headers);
+		} else {
+			ReactorUtils.deActivate();
+			actual.onComplete();
 		}
-		actual.onComplete();
 	}
 
 	@Override
 	public void onSubscribe(Subscription s) {
+		if(headers == null) {
+			headers = new NRReactorHeaders();
+		}
+		if(headers.isEmpty()) {
+			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
+		}
 		subscription = s;
 		actual.onSubscribe(this);
 	}
 
 	@Override
-	@Trace(dispatcher=true)
+	@Trace
 	public void request(long n) {
-		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","Subscriber",name,"request");
-		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
-			if (headers != null && !headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
-			} else {
-				transaction.ignore();
-			}
-		}
+		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"request");
 		subscription.request(n);
 	}
 
 	@Override
-	@Trace(dispatcher=true)
+	@Trace
 	public void cancel() {
-		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","Subscriber",name,"cancel");
-		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
-			if (headers != null && !headers.isEmpty()) {
-				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
-			} else {
-				transaction.ignore();
-			}
-		}
+		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"cancel");
 		subscription.cancel();
 	}
 
