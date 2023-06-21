@@ -8,12 +8,13 @@ public class NRRunnableWrapper implements Runnable {
 	
 	private Runnable delegate = null;
 	
-	private Token token = null;
+	//private Token token = null; //gulab
+	private NRReactorHeaders headers = null;
 	private static boolean isTransformed = false;
 	
-	public NRRunnableWrapper(Runnable r, Token t) {
+	public NRRunnableWrapper(Runnable r, NRReactorHeaders h) {
 		delegate = r;
-		token = t;
+		headers = h;
 		if(!isTransformed) {
 			isTransformed = true;
 			AgentBridge.instrumentation.retransformUninstrumentedClass(getClass());
@@ -21,11 +22,10 @@ public class NRRunnableWrapper implements Runnable {
 	}
 
 	@Override
-	@Trace(async=true)
+	@Trace(dispatcher=true)
 	public void run() {
-		if(token != null) {
-			token.linkAndExpire();
-			token = null;
+		if(headers != null) {
+			HeaderUtils.acceptHeaders(headers);
 		}
 		if(delegate != null) {
 			delegate.run();

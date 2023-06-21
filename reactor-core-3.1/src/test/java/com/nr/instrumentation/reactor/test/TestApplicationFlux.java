@@ -2,6 +2,7 @@ package com.nr.instrumentation.reactor.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,18 +20,19 @@ import com.newrelic.agent.introspec.TracedMetricData;
 import com.newrelic.agent.introspec.TransactionTrace;
 import com.newrelic.api.agent.Trace;
 
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
+
 import reactor.core.scheduler.Schedulers;
 
 @RunWith(InstrumentationTestRunner.class)
 @InstrumentationTestConfig(includePrefixes = "reactor.core")
-public class TestApplication {
+public class TestApplicationFlux {
 	
-	private static final String txn1 = "OtherTransaction/Custom/com.nr.instrumentation.reactor.test.TestApplication/testMonoSub";
+	private static final String txn1 = "OtherTransaction/Custom/com.nr.instrumentation.reactor.test.TestApplicationFlux/testFluxSub";
 	
 	@Test
-	public void doMonoSubscribeOnTest() {
-		testMonoSub();
+	public void doFluxSubscribeOnTest() {
+		testFluxSub();
 
 		Introspector introspector = InstrumentationTestRunner.getIntrospector();
 		int finishedTransactionCount = introspector.getFinishedTransactionCount(5000);
@@ -76,27 +78,20 @@ public class TestApplication {
 	}
 	
 	@Trace(dispatcher = true)
-	public void testMonoSub() {
-		System.out.println("Enter testMonoSub");
-		Mono<String> mono = getStringMono();
-		
-		mono.subscribeOn(Schedulers.single()).subscribe(s -> System.out.println("Result is "+s));
-		
-		System.out.println("Exit testMonoSub");
+	public void testFluxSub() {
+	    System.out.println("Enter testFluxSub");
+	    Flux<String> flux = getStringFlux();
 
+	    flux.subscribeOn(Schedulers.single())
+	        .subscribe(s -> System.out.println("Received: " + s));
+
+	    flux.blockLast(); // Blocks until the Flux completes
+
+	    System.out.println("Exit testFluxSub");
 	}
 
-	public Mono<String> getStringMono() {
-		
-		
-		return Mono.fromCallable(() -> {
-			try {
-				Thread.sleep(100L);
-			} catch(Exception e) {
-				
-			}
-			return "hello";
-		});
+	public Flux<String> getStringFlux() {
+	    return Flux.just("new","relic","labs").delayElements(Duration.ofMillis(100));
 	}
 	
 	
