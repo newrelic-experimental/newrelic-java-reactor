@@ -1,20 +1,19 @@
 package com.nr.instrumentation.reactor;
 
 import com.newrelic.agent.bridge.AgentBridge;
-import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
-import com.newrelic.api.agent.TransportType;
 
 public class NRRunnableWrapper implements Runnable {
 	
 	private Runnable delegate = null;
 	
-	private NRReactorHeaders headers;
+	private Token token = null;
 	private static boolean isTransformed = false;
 	
-	public NRRunnableWrapper(Runnable r, NRReactorHeaders h) {
+	public NRRunnableWrapper(Runnable r, Token t) {
 		delegate = r;
-		headers = h;
+		token = t;
 		if(!isTransformed) {
 			isTransformed = true;
 			AgentBridge.instrumentation.retransformUninstrumentedClass(getClass());
@@ -22,17 +21,11 @@ public class NRRunnableWrapper implements Runnable {
 	}
 
 	@Override
-	@Trace(dispatcher=true)
+	@Trace(async=true)
 	public void run() {
-		boolean ignore = true;
-		if(headers != null) {
-			if(!headers.isEmpty()) {
-				NewRelic.getAgent().getTransaction().acceptDistributedTraceHeaders(TransportType.Other, headers);
-				ignore = false;
-			}
-		}
-		if(ignore) {
-			NewRelic.getAgent().getTransaction().ignore();
+		if(token != null) {
+			token.linkAndExpire();
+			token = null;
 		}
 		if(delegate != null) {
 			delegate.run();
