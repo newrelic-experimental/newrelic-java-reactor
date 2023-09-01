@@ -1,5 +1,7 @@
 package com.nr.instrumentation.reactor;
 
+import org.reactivestreams.Subscription;
+
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
@@ -35,6 +37,20 @@ public class ReactorDispatcher {
 		}
 		sub.onNext(t);
 	}
+
+	@Trace(dispatcher = true)
+	public static <T> void startOnSubscribeTransaction(String name,CoreSubscriber<T> sub, Subscription subscription, NRReactorHeaders headers) {
+		ReactorUtils.setActive();
+		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onSubscribe");
+		Transaction transaction = NewRelic.getAgent().getTransaction();
+		if (transaction != null) {
+			if (headers != null && !headers.isEmpty()) {
+				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
+		}
+		sub.onSubscribe(subscription);
+	}
+
 
 	@Trace(dispatcher = true)
 	public static <T> void startOnCompleteTransaction(String name,CoreSubscriber<T> sub, NRReactorHeaders headers) {

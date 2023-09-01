@@ -5,6 +5,7 @@ import org.reactivestreams.Subscription;
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
+import com.newrelic.api.agent.TracedMethod;
 import com.newrelic.api.agent.Transaction;
 
 import reactor.core.CoreSubscriber;
@@ -34,7 +35,9 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 		if(name == null || name.isEmpty()) name = "Scannable";
 		headers = new NRReactorHeaders();
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
+		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
+		
+		if (transaction != null && !(traced instanceof com.newrelic.agent.bridge.NoOpTracedMethod)) {
 			transaction.insertDistributedTraceHeaders(headers);
 		}
 
@@ -71,14 +74,20 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 
 	@Override
 	public void onSubscribe(Subscription s) {
-		if(headers == null) {
-			headers = new NRReactorHeaders();
-		}
-		if(headers.isEmpty()) {
-			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
-		}
 		subscription = s;
-		actual.onSubscribe(this);
+		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
+		boolean isNoOp = traced.getClass().getSimpleName().toLowerCase().contains("noop");
+		if(!ReactorUtils.activeTransaction() || isNoOp) {
+			ReactorDispatcher.startOnSubscribeTransaction(name, actual, s, headers);
+		} else {
+			if(headers == null) {
+				headers = new NRReactorHeaders();
+			}
+			if(headers.isEmpty()) {
+				NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
+			}
+			actual.onSubscribe(this);
+		}
 	}
 
 	@Override

@@ -2,9 +2,12 @@ package com.nr.instrumentation.reactor;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 import org.reactivestreams.Publisher;
 
+import com.newrelic.agent.transaction.TransactionTimer;
+import com.newrelic.api.agent.Logger;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Transaction;
 
@@ -46,10 +49,21 @@ public class ReactorUtils {
 
 			@Override
 			public CoreSubscriber<? super T> apply(Scannable t, CoreSubscriber<? super T> u) {
-				return new NRSubscriberWrapper(u,t);
+					return new NRSubscriberWrapper(u,t);
 			}
 		});
 		
+	}
+	
+	public static boolean timerStarted() {
+		com.newrelic.agent.Transaction txn = com.newrelic.agent.Transaction.getTransaction(false);
+		if(txn != null) {
+			TransactionTimer timer = txn.getTransactionTimer();
+			if(timer != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static boolean activeTransaction() {

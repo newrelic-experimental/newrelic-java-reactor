@@ -1,5 +1,7 @@
 package com.nr.instrumentation.reactor;
 
+import java.util.logging.Level;
+
 import org.reactivestreams.Subscription;
 
 import com.newrelic.agent.bridge.AgentBridge;
@@ -34,6 +36,7 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 		if(name == null || name.isEmpty()) name = "Scannable";
 		headers = new NRReactorHeaders();
 		Transaction transaction = NewRelic.getAgent().getTransaction();
+		NewRelic.getAgent().getLogger().log(Level.FINE, "In NRSubscriberWrapper.<init>, transaction is {0}", transaction);
 		if (transaction != null) {
 			transaction.insertDistributedTraceHeaders(headers);
 		}

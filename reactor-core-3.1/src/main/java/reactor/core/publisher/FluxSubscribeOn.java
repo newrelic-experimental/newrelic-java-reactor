@@ -16,8 +16,8 @@ import reactor.core.CoreSubscriber;
 @Weave
 abstract class FluxSubscribeOn<T> {
 
-	
 	public void subscribe(CoreSubscriber<? super T> actual) {
 		Weaver.callOriginal();
 	}
+
 }
