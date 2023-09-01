@@ -4,22 +4,17 @@
 apply plugin: 'java'
 
 dependencies {
-   implementation 'io.projectreactor:reactor-core:3.1.0.RELEASE'
+   implementation 'io.projectreactor:reactor-core:3.3.0.RELEASE'
 
    // New Relic Java Agent dependencies
    implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
    implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
    implementation fileTree(include: ['*.jar'], dir: '../libs')
-   
-   testImplementation('io.projectreactor:reactor-core:3.2.11.RELEASE')
-   testImplementation 'junit:junit:4.12'
-   testImplementation fileTree(include: ['*.jar'], dir: '../test-lib')
-
 }
 
 jar {
   manifest {
-    attributes 'Implementation-Title': 'com.newrelic.instrumentation.labs.reactor-core-3.1'
+    attributes 'Implementation-Title': 'com.newrelic.instrumentation.labs.reactor-core-3.3'
     attributes 'Implementation-Vendor': 'New Relic Labs'
     attributes 'Implementation-Vendor-Id': 'com.newrelic.labs'
     attributes 'Implementation-Version': 1.0
@@ -27,5 +22,5 @@ jar {
 }
 
 verifyInstrumentation {
-	passes 'io.projectreactor:reactor-core:[3.1.0.RELEASE,3.3.0.RELEASE)'
+	passes 'io.projectreactor:reactor-core:[3.3.0.RELEASE,)'
 }
