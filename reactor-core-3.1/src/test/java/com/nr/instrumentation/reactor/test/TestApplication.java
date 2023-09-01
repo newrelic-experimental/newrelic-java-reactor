@@ -1,22 +1,21 @@
 package com.nr.instrumentation.reactor.test;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.newrelic.agent.introspec.InstrumentationTestConfig;
 import com.newrelic.agent.introspec.InstrumentationTestRunner;
 import com.newrelic.agent.introspec.Introspector;
-import com.newrelic.agent.introspec.SpanEvent;
-import com.newrelic.agent.introspec.TraceSegment;
 import com.newrelic.agent.introspec.TracedMetricData;
-import com.newrelic.agent.introspec.TransactionTrace;
 import com.newrelic.api.agent.Trace;
 
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -25,57 +24,77 @@ import reactor.core.scheduler.Schedulers;
 public class TestApplication {
 	
 	private static final String txn1 = "OtherTransaction/Custom/com.nr.instrumentation.reactor.test.TestApplication/testMonoSub";
+	private static final String txn2 = "OtherTransaction/Custom/com.nr.instrumentation.reactor.NRRunnableWrapper/run";
+	private static final String txn3 = "OtherTransaction/Custom/com.nr.instrumentation.reactor.test.TestApplication/testMonoPub";
 	
+
 	@Test
 	public void doMonoSubscribeOnTest() {
+		/**
+		 * This should result in two transaction, one is the main thread and the other is the result of the subscribe action
+		 */
 		testMonoSub();
 
 		Introspector introspector = InstrumentationTestRunner.getIntrospector();
 		int finishedTransactionCount = introspector.getFinishedTransactionCount(5000);
-		System.out.println("Finished transaction count: "+finishedTransactionCount);
+		Assert.assertEquals("Expected two transactions", finishedTransactionCount, 2L);
 		
 		Collection<String> txnNames = introspector.getTransactionNames();
-		for(String tName : txnNames) {
-			System.out.println("Transaction Name: "+tName);
-		}
+		boolean contains = txnNames.contains(txn1) & txnNames.contains(txn2);
+		Assert.assertTrue(contains);
 		
-		Map<String, TracedMetricData> metrics = introspector.getMetricsForTransaction(txn1);
+		Map<String, TracedMetricData> metrics = introspector.getMetricsForTransaction(txn2);
+		Set<String> names = metrics.keySet();
+		Assert.assertTrue(names.contains("Java/com.nr.instrumentation.reactor.NRRunnableWrapper/run"));
+		Assert.assertTrue(names.contains("Custom/com.nr.instrumentation.reactor.test.TestApplication/doSubscribeAction"));
+	}
+	
+	@Test
+	public void doMonoPublishOnTest() {
+		/**
+		 * This should result in two transaction, one is the main thread and the other is the result of the publish action
+		 */
+		testMonoPub();
+
+		Introspector introspector = InstrumentationTestRunner.getIntrospector();
+		int finishedTransactionCount = introspector.getFinishedTransactionCount(5000);
+		Assert.assertEquals("Expected two transaction", finishedTransactionCount, 2L);
+		
+		Collection<String> txnNames = introspector.getTransactionNames();
+		boolean contains = txnNames.contains(txn3) & txnNames.contains(txn2);
+		Assert.assertTrue(contains);
+		
+		Map<String, TracedMetricData> metrics = introspector.getMetricsForTransaction(txn2);
 		Set<String> names = metrics.keySet();
 		for(String name : names) {
-			TracedMetricData traced = metrics.get(name);
-			System.out.println("Traced: name="+traced.getName()+", call count="+traced.getCallCount()+", totalTime="+traced.getTotalTimeInSec());
+			System.out.println("trace: "+ name);
 		}
-		
-		Collection<TransactionTrace> traces = introspector.getTransactionTracesForTransaction(txn1);
-		System.out.println("Returned "+traces.size()+" transaction traces");
-		for(TransactionTrace trace : traces) {
-			System.out.println("Trace: start="+trace.getStartTime()+", response time="+trace.getResponseTimeInSec());
-			TraceSegment current = trace.getInitialTraceSegment();
-			System.out.println("Initial Segment: name="+current.getName()+", method name:"+current.getMethodName()+", class name: "+current.getClassName()+", call count="+current.getCallCount());
-			List<TraceSegment> children = current.getChildren();
-			System.out.println("Contains "+children.size()+" children");
-			int count = 0;
-			while(children != null && children.size() > 0) {
-				count++;
-				current = children.get(0);
-				System.out.println("Child Segment "+count+": name="+current.getName()+", method name:"+current.getMethodName()+", class name: "+current.getClassName()+", call count="+current.getCallCount());
-				children = current.getChildren();
-				System.out.println("Contains "+children.size()+" children");
-			}
-			
-			Collection<SpanEvent> spans = introspector.getSpanEvents();
-			System.out.println("There are "+spans.size()+" spans");
-		}
+		Assert.assertTrue(names.contains("Java/com.nr.instrumentation.reactor.NRRunnableWrapper/run"));
+		//Assert.assertTrue(names.contains("Custom/com.nr.instrumentation.reactor.test.TestApplication/doSubscribeAction"));
 	}
 	
 	@Trace(dispatcher = true)
+	public void testMonoPub() {
+		System.out.println("Enter testMonoPub");
+		Mono<String> mono = getStringMono().publishOn(Schedulers.single());
+
+		mono.subscribeWith(new MonoCoreSubscriber());
+		String result = mono.block();
+		
+		System.out.println("Exit testMonoPub with result: "+ result);
+		
+	}
+
+	@Trace(dispatcher = true)
 	public void testMonoSub() {
 		System.out.println("Enter testMonoSub");
-		Mono<String> mono = getStringMono();
+		ResultConsumer c = new ResultConsumer();
+		Mono<String> mono = getStringMono().subscribeOn(Schedulers.single()).doOnSuccess(c);
 		
-		mono.subscribeOn(Schedulers.single()).subscribe(s -> System.out.println("Result is "+s));
+		mono.subscribe(s -> doSubscribeAction(s));
 		
-		System.out.println("Exit testMonoSub");
+		
+		System.out.println("Exit testMonoSub wit result: " + c.result);
 
 	}
 
@@ -90,5 +109,27 @@ public class TestApplication {
 			}
 			return "hello";
 		});
+	}
+	
+	@Trace
+	public void doSubscribeAction(String s) {
+		try {
+			Thread.sleep(100L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Result is "+s);
+	}
+	
+	private class ResultConsumer implements Consumer<String> {
+		
+		String result;
+
+		@Override
+		@Trace
+		public void accept(String t) {
+			result = t;
+		}
+		
 	}
 }
