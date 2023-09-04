@@ -1,4 +1,4 @@
-name: Build and Release v1.2
+name: Build and Release v1.2.1
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Build with Gradle and verifyInstrumentation
         run: |
-          ./gradlew build install verifyInstrumentation
+          ./gradlew clean install verifyInstrumentation
 
       - name: Identify Release Type
         id: define_release_type
