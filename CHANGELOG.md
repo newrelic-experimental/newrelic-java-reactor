@@ -1,6 +1,12 @@
-## Version: [v2.0.1](https://github.com/newrelic-experimental/newrelic-java-reactor/releases/tag/v2.0.1) | Created: 2023-09-22
+## Version: [v2.0.0](https://github.com/newrelic-experimental/newrelic-java-reactor/releases/tag/v2.0.0) | Created: 2023-09-22
 
+### Bug Fixes
+- Build fixes
+- Merge pull request #2 from newrelic-experimental/buildfixes
 
+### Enhancements
+- Enhanced Distributed Tracing: With the latest update, transaction traces are now seamlessly integrated into distributed tracing. We've refactored our Reactor instrumentation to use DT headers, reducing overhead and ensuring a more accurate representation of the transaction flow, aligning with open telemetry best practices.
+- 
 ## Installation
 
 To install:
