@@ -7,8 +7,8 @@ dependencies {
    implementation 'io.projectreactor:reactor-core:2.0.1.RELEASE'
 
    // New Relic Labs Java Agent dependencies
-   implementation 'com.newrelic.agent.java:newrelic-agent:6.0.0'
-   implementation 'com.newrelic.agent.java:newrelic-api:6.0.0'
+   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.1'
+   implementation 'com.newrelic.agent.java:newrelic-api:6.4.1'
    implementation fileTree(include: ['*.jar'], dir: '../libs')
 }
 
