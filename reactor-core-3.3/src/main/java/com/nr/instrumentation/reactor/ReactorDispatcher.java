@@ -30,7 +30,7 @@ public class ReactorDispatcher {
 		ReactorUtils.setActive();
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onNext");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
+		if (transaction != null && ReactorUtils.activeTransaction()) {
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}
@@ -43,7 +43,7 @@ public class ReactorDispatcher {
 		ReactorUtils.setActive();
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onSubscribe");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
+		if (transaction != null && ReactorUtils.activeTransaction()) {
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}
@@ -56,7 +56,7 @@ public class ReactorDispatcher {
 	public static <T> void startOnCompleteTransaction(String name,CoreSubscriber<T> sub, NRReactorHeaders headers) {
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onComplete");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
+		if (transaction != null && ReactorUtils.activeTransaction()) {
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}
@@ -68,7 +68,7 @@ public class ReactorDispatcher {
 	public static <T> void startOnErrorTransaction(String name,CoreSubscriber<T> sub, NRReactorHeaders headers, Throwable t) {
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onError");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		if (transaction != null) {
+		if (transaction != null && ReactorUtils.activeTransaction()) {
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}

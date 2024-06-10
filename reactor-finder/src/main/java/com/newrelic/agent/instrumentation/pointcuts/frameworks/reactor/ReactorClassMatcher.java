@@ -2,12 +2,10 @@ package com.newrelic.agent.instrumentation.pointcuts.frameworks.reactor;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.logging.Level;
 
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.agent.deps.org.objectweb.asm.ClassReader;
 import com.newrelic.agent.instrumentation.classmatchers.ClassMatcher;
-import com.newrelic.api.agent.NewRelic;
 
 /**
  * Class matcher that matches any class that doesn't belong to reactor.core or its subpackages

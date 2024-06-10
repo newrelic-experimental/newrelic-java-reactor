@@ -35,12 +35,14 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 		if(name == null || name.isEmpty()) name = "Scannable";
 		headers = new NRReactorHeaders();
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		TracedMethod traced = NewRelic.getAgent().getTracedMethod();
-		
-		if (transaction != null && !(traced instanceof com.newrelic.agent.bridge.NoOpTracedMethod)) {
-			transaction.insertDistributedTraceHeaders(headers);
+		if (transaction != null && ReactorUtils.activeTransaction()) {
+			try {
+				transaction.insertDistributedTraceHeaders(headers);
+			} catch(Exception e) {
+				String exceptionName = e.getClass().getSimpleName();
+				NewRelic.incrementCounter("NRLabs/Reactor/NRSubscriberWrapper/Exception/"+exceptionName);
+			}
 		}
-
 	}
 
 	@Override
@@ -84,7 +86,15 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 				headers = new NRReactorHeaders();
 			}
 			if(headers.isEmpty()) {
-				NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
+				Transaction transaction = NewRelic.getAgent().getTransaction();
+				if (transaction != null && ReactorUtils.activeTransaction()) {
+					try {
+						transaction.insertDistributedTraceHeaders(headers);
+					} catch(Exception e) {
+						String exceptionName = e.getClass().getSimpleName();
+						NewRelic.incrementCounter("NRLabs/Reactor/NRSubscriberWrapper/Exception/"+exceptionName);
+					}
+				}
 			}
 			actual.onSubscribe(this);
 		}

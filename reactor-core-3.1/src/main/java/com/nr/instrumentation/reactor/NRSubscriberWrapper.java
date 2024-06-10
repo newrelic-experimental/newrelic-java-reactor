@@ -1,7 +1,5 @@
 package com.nr.instrumentation.reactor;
 
-import java.util.logging.Level;
-
 import org.reactivestreams.Subscription;
 
 import com.newrelic.agent.bridge.AgentBridge;
@@ -36,9 +34,13 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 		if(name == null || name.isEmpty()) name = "Scannable";
 		headers = new NRReactorHeaders();
 		Transaction transaction = NewRelic.getAgent().getTransaction();
-		NewRelic.getAgent().getLogger().log(Level.FINE, "In NRSubscriberWrapper.<init>, transaction is {0}", transaction);
-		if (transaction != null) {
-			transaction.insertDistributedTraceHeaders(headers);
+		if (transaction != null && ReactorUtils.activeTransaction()) {
+			try {
+				transaction.insertDistributedTraceHeaders(headers);
+			} catch(Exception e) {
+				String exceptionName = e.getClass().getSimpleName();
+				NewRelic.incrementCounter("NRLabs/Reactor/NRSubscriberWrapper/Exception/"+exceptionName);
+			}
 		}
 
 	}
@@ -78,7 +80,15 @@ public class NRSubscriberWrapper<T> implements CoreSubscriber<T>, QueueSubscript
 			headers = new NRReactorHeaders();
 		}
 		if(headers.isEmpty()) {
-			NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(headers);
+			Transaction transaction = NewRelic.getAgent().getTransaction();
+			if (transaction != null && ReactorUtils.activeTransaction()) {
+				try {
+					transaction.insertDistributedTraceHeaders(headers);
+				} catch(Exception e) {
+					String exceptionName = e.getClass().getSimpleName();
+					NewRelic.incrementCounter("NRLabs/Reactor/NRSubscriberWrapper/Exception/"+exceptionName);
+				}
+			}
 		}
 		subscription = s;
 		actual.onSubscribe(this);
