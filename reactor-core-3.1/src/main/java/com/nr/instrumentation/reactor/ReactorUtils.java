@@ -5,8 +5,8 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
-import com.newrelic.api.agent.NewRelic;
-import com.newrelic.api.agent.Transaction;
+import com.newrelic.agent.bridge.AgentBridge;
+import com.newrelic.agent.bridge.Transaction;
 
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -32,7 +32,6 @@ public class ReactorUtils {
 	
 	public static void initialize() {
 		initialized = true;
-		//Hooks.onEachOperator("NewRelicWrapper",asOperator());		
 		Hooks.onLastOperator("NewRelicWrapper",asOperator());
 		ReactorDispatcher.get();
 		
@@ -52,19 +51,11 @@ public class ReactorUtils {
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static boolean activeTransaction() {
-		Boolean active = transactionActive.get();
-		Transaction txn = NewRelic.getAgent().getTransaction();
-		// if transaction is NoOp then there is no active transaction
-		boolean isNoOp = txn.getClass().getName().toLowerCase().contains("noop");
-		if(!active && !isNoOp) {
-			setActive();
-			active = true;
-		} else if(active && isNoOp) {
-			deActivate();
-			active = false;
-		}
-		return active;
+		if(transactionActive.get()) return true;
+		Transaction transaction = AgentBridge.getAgent().getTransaction();
+		return transaction != null ? transaction.isStarted() : false;
 	}
 	
 	public static void setActive() {

@@ -2,14 +2,13 @@ package com.nr.instrumentation.reactor;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 import org.reactivestreams.Publisher;
 
+import com.newrelic.agent.bridge.AgentBridge;
+import com.newrelic.agent.bridge.TracedMethod;
+import com.newrelic.agent.bridge.Transaction;
 import com.newrelic.agent.transaction.TransactionTimer;
-import com.newrelic.api.agent.Logger;
-import com.newrelic.api.agent.NewRelic;
-import com.newrelic.api.agent.Transaction;
 
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Operators;
 
 public class ReactorUtils {
-	
 	
 	private static ThreadLocal<Boolean> transactionActive = new ThreadLocal<Boolean>() {
 
@@ -35,7 +33,6 @@ public class ReactorUtils {
 	
 	public static void initialize() {
 		initialized = true;
-		//Hooks.onEachOperator("NewRelicWrapper",asOperator());		
 		Hooks.onLastOperator("NewRelicWrapper",asOperator());
 		ReactorDispatcher.get();
 		
@@ -66,19 +63,15 @@ public class ReactorUtils {
 		return false;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static boolean activeTransaction() {
-		Boolean active = transactionActive.get();
-		Transaction txn = NewRelic.getAgent().getTransaction();
-		// if transaction is NoOp then there is no active transaction
-		boolean isNoOp = txn.getClass().getName().toLowerCase().contains("noop");
-		if(!active && !isNoOp) {
-			setActive();
-			active = true;
-		} else if(active && isNoOp) {
-			deActivate();
-			active = false;
+		if(transactionActive.get()) return true;
+		com.newrelic.api.agent.TracedMethod tracer = AgentBridge.getAgent().getTransaction().getTracedMethod();
+		if(tracer != null) {
+			transactionActive.set(true);
+			return true;
 		}
-		return active;
+		return false;
 	}
 	
 	public static void setActive() {

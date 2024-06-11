@@ -4,7 +4,6 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.newrelic.agent.deps.org.objectweb.asm.commons.Method;
 import com.newrelic.agent.instrumentation.InstrumentationType;
@@ -17,7 +16,6 @@ import com.newrelic.agent.instrumentation.context.InstrumentationContext;
 import com.newrelic.agent.instrumentation.context.InstrumentationContextManager;
 import com.newrelic.agent.instrumentation.methodmatchers.MethodMatcher;
 import com.newrelic.agent.instrumentation.tracing.TraceDetailsBuilder;
-import com.newrelic.api.agent.NewRelic;
 
 public class ReactorClassTransformer implements ContextClassTransformer {
 
@@ -52,9 +50,8 @@ public class ReactorClassTransformer implements ContextClassTransformer {
 			for (ClassAndMethodMatcher matcher : match.getClassMatches().keySet()) {
 				if (matcher.getMethodMatcher().matches(MethodMatcher.UNSPECIFIED_ACCESS, method.getName(),
 						method.getDescriptor(), match.getMethodAnnotations(method))) {
-					NewRelic.getAgent().getLogger().log(Level.FINE, "Adding Trace annotation to class {0} and method {1}",className, method.getName());
 					context.putTraceAnnotation(method, TraceDetailsBuilder.newBuilder().setTracerFactoryName(ReactorPreMain.TRACER_FACTORY_NAME)
-							.setInstrumentationSourceName("New Relic Labs").setInstrumentationType(InstrumentationType.TraceAnnotation).setDispatcher(true).build());
+							.setInstrumentationSourceName("New Relic Labs").setInstrumentationType(InstrumentationType.TraceAnnotation).setDispatcher(false).build());
 				}
 
 			}
