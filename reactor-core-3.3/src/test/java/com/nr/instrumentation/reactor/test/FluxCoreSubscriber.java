@@ -6,31 +6,32 @@ import com.newrelic.api.agent.Trace;
 
 import reactor.core.CoreSubscriber;
 
-public class MonoCoreSubscriber implements CoreSubscriber<String> {
+public class FluxCoreSubscriber implements CoreSubscriber<Integer> {
 
 	@Override
 	@Trace
-	public void onNext(String t) {
-		System.out.println("Received string for onNext: " + t);
+	public void onNext(Integer t) {
+		System.out.println("Received Integer for onNext: " + t);
 	}
 
 	@Override
 	@Trace
 	public void onError(Throwable t) {
 		System.out.println("Received error for onError: " + t);
+		t.printStackTrace();
 	}
 
 	@Override
 	@Trace
 	public void onComplete() {
-		System.out.println("Mono has completed");
+		System.out.println("Flux has completed");
 	}
 
 	@Override
 	@Trace
 	public void onSubscribe(Subscription var1) {
-		System.out.println("Mono was subscribed to by : " + var1);
-		var1.request(1);
+		System.out.println("Flux was subscribed to by : " + var1);
+		var1.request(10);
 	}
 
 }

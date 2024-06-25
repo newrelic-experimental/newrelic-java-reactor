@@ -1,8 +1,9 @@
-package com.nr.instrumentation.reactor;
+package com.newrelic.instrumentation.labs.reactor;
 
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
+import com.newrelic.api.agent.TransactionNamePriority;
 import com.newrelic.api.agent.TransportType;
 
 public class NRRunnableWrapper implements Runnable {
@@ -35,6 +36,8 @@ public class NRRunnableWrapper implements Runnable {
 			NewRelic.getAgent().getTransaction().ignore();
 		}
 		if(delegate != null) {
+			NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor","ScheduledRunnable",delegate.getClass().getSimpleName());
+			NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_HIGH, false, "ReactorRunnable", "Reactor","Submitted",delegate.getClass().getSimpleName());
 			delegate.run();
 		}
 	}

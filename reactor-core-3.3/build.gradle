@@ -10,6 +10,11 @@ dependencies {
    implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
    implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
    implementation fileTree(include: ['*.jar'], dir: '../libs')
+   
+   testImplementation('io.projectreactor:reactor-core:3.2.11.RELEASE')
+   testImplementation 'junit:junit:4.12'
+   testImplementation fileTree(include: ['*.jar'], dir: '../test-lib')
+
 }
 
 jar {
@@ -18,7 +23,6 @@ jar {
     attributes 'Implementation-Vendor': 'New Relic Labs'
     attributes 'Implementation-Vendor-Id': 'com.newrelic.labs'
     attributes 'Implementation-Version': 1.0
-	attributes 'Agent-Class': 'com.nr.instrumentation.reactor.NRReactorPremain'
   }
 }
 

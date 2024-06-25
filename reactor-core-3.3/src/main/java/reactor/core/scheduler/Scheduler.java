@@ -7,8 +7,8 @@ import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
-import com.nr.instrumentation.reactor.NRReactorHeaders;
-import com.nr.instrumentation.reactor.NRRunnableWrapper;
+import com.newrelic.instrumentation.labs.reactor.NRReactorHeaders;
+import com.newrelic.instrumentation.labs.reactor.NRRunnableWrapper;
 
 import reactor.core.Disposable;
 

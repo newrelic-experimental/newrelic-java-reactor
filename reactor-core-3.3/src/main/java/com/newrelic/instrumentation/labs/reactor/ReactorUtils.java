@@ -1,4 +1,4 @@
-package com.nr.instrumentation.reactor;
+package com.newrelic.instrumentation.labs.reactor;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -6,8 +6,6 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import com.newrelic.agent.bridge.AgentBridge;
-import com.newrelic.agent.bridge.TracedMethod;
-import com.newrelic.agent.bridge.Transaction;
 import com.newrelic.agent.transaction.TransactionTimer;
 
 import reactor.core.CoreSubscriber;

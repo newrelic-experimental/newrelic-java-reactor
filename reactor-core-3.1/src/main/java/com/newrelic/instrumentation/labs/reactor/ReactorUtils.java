@@ -1,4 +1,4 @@
-package com.nr.instrumentation.reactor;
+package com.newrelic.instrumentation.labs.reactor;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

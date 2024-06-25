@@ -1,9 +1,12 @@
-package com.nr.instrumentation.reactor;
+package com.newrelic.instrumentation.labs.reactor;
+
+import org.reactivestreams.Subscription;
 
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.Transaction;
+import com.newrelic.api.agent.TransactionNamePriority;
 import com.newrelic.api.agent.TransportType;
 
 import reactor.core.CoreSubscriber;
@@ -23,13 +26,13 @@ public class ReactorDispatcher {
 		AgentBridge.instrumentation.retransformUninstrumentedClass(getClass());
 	}
 	
-	
 	@Trace(dispatcher = true)
 	public static <T> void startOnNextTransaction(String name,CoreSubscriber<T> sub, T t, NRReactorHeaders headers) {
 		ReactorUtils.setActive();
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onNext");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
 		if (transaction != null && ReactorUtils.activeTransaction()) {
+			NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Reactor", "Reactor","OnNext");
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}
@@ -38,10 +41,26 @@ public class ReactorDispatcher {
 	}
 
 	@Trace(dispatcher = true)
+	public static <T> void startOnSubscribeTransaction(String name,CoreSubscriber<T> sub, Subscription subscription, NRReactorHeaders headers) {
+		ReactorUtils.setActive();
+		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onSubscribe");
+		Transaction transaction = NewRelic.getAgent().getTransaction();
+		if (transaction != null && ReactorUtils.activeTransaction()) {
+			NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Reactor", "Reactor","OnSubscribe");
+			if (headers != null && !headers.isEmpty()) {
+				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
+			}
+		}
+		sub.onSubscribe(subscription);
+	}
+
+
+	@Trace(dispatcher = true)
 	public static <T> void startOnCompleteTransaction(String name,CoreSubscriber<T> sub, NRReactorHeaders headers) {
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onComplete");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
 		if (transaction != null && ReactorUtils.activeTransaction()) {
+			NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Reactor", "Reactor","OnComplete");
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}
@@ -54,6 +73,7 @@ public class ReactorDispatcher {
 		NewRelic.getAgent().getTracedMethod().setMetricName("Custom","Reactor",name,"onError");
 		Transaction transaction = NewRelic.getAgent().getTransaction();
 		if (transaction != null && ReactorUtils.activeTransaction()) {
+			NewRelic.getAgent().getTransaction().setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Reactor", "Reactor","OnError");
 			if (headers != null && !headers.isEmpty()) {
 				transaction.acceptDistributedTraceHeaders(TransportType.Other, headers);
 			}

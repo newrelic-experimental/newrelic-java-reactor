@@ -3,7 +3,7 @@ package reactor.core.publisher;
 import com.newrelic.api.agent.weaver.MatchType;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
-import com.nr.instrumentation.reactor.ReactorUtils;
+import com.newrelic.instrumentation.labs.reactor.ReactorUtils;
 
 @Weave(originalName="reactor.core.publisher.Flux",type = MatchType.BaseClass)
 public abstract class Flux_instrumentation {
