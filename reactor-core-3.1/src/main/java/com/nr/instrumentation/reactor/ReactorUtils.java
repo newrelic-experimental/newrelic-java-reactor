@@ -1,68 +1,32 @@
 package com.nr.instrumentation.reactor;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-
-import com.newrelic.agent.bridge.AgentBridge;
-import com.newrelic.agent.bridge.Transaction;
-
-import reactor.core.CoreSubscriber;
-import reactor.core.Scannable;
-import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Operators;
+import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Token;
 
 public class ReactorUtils {
 	
 	
-	private static ThreadLocal<Boolean> transactionActive = new ThreadLocal<Boolean>() {
-
-		@Override
-        protected Boolean initialValue() {
-            return false;
-        }	
-	
-	};
-	
 	public static boolean initialized = false;
 	
-	public static final String NRHEADERS = "NEWRELIC_HEADERS";
-
-	
 	public static void initialize() {
-		initialized = true;
-		Hooks.onLastOperator("NewRelicWrapper",asOperator());
-		ReactorDispatcher.get();
-		
+		initialized = true;		
 	}
-	
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static <T> Function<? super Publisher<T>, ? extends Publisher<T>> asOperator() {
-		
-		return Operators.lift(new BiFunction<Scannable, CoreSubscriber<? super T>, CoreSubscriber<? super T>>() {
 
-			@Override
-			public CoreSubscriber<? super T> apply(Scannable t, CoreSubscriber<? super T> u) {
-				return new NRSubscriberWrapper(u,t);
+	public static NRRunnableWrapper getRunnableWrapper(Runnable r) {
+		if(r instanceof NRRunnableWrapper) {return null;}
+
+		Token currentToken = NewRelic.getAgent().getTransaction().getToken();
+		if(currentToken != null) {
+			if(currentToken.isActive()) {
+				return new NRRunnableWrapper(r, currentToken);
+			} else {
+				currentToken.expire();
+				currentToken = null;
+				return null;
 			}
-		});
-		
+		}
+
+		return null;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static boolean activeTransaction() {
-		if(transactionActive.get()) return true;
-		Transaction transaction = AgentBridge.getAgent().getTransaction();
-		return transaction != null ? transaction.isStarted() : false;
-	}
-	
-	public static void setActive() {
-		transactionActive.set(true);
-	}
-	
-	public static void deActivate() {
-		transactionActive.set(false);
-	}
 }
