@@ -20,11 +20,7 @@
 New Relic Java Agent instrumentation for the Reactor Framework (https://projectreactor.io/)
   
 ## Transaction Views   
-This instrumentation provides two different ways to view transaction in an application using Reactor.  Releaase V2.0 provides a Distributed Tracing view where a request will generate multiple transactions that are tied together in the Distributed Tracing View of the New Relic Java Agent UI.  Release V1.1 uses the New Relic Java Agent Async token to tie things together into a single transaction showing actions across all threads.   
-### Pros and Cons   
-The pro of using V1.1 is that it results in a single transaction in both the Transaction Trace view and the Distributed Tracing view.   The con is that in a high throughput environment where Reactor actions happen across multiple threads it can lead to high memory usage for the async token cache.   
-The pro of using v2.0.0 (& onwards) is that it has a much lower memory usage.  The con is that to view what happens with the request you can only use the Distributed Tracing view.   
-
+The latest version has reverted to a single transaction by simplifying the code.  If you prefer the multiple transaction distributed tracing view of previous versions then use release 2.02.   
 ## Installation
    
 To install:
