@@ -10,9 +10,10 @@ import com.nr.instrumentation.reactor.NRRunnableWrapper;
 import com.nr.instrumentation.reactor.ReactorUtils;
 
 import reactor.core.Disposable;
+import reactor.util.annotation.Nullable;
 
-@Weave
-public class Schedulers {
+@Weave(originalName = "reactor.core.scheduler.Schedulers")
+public class Schedulers_Instrumentation {
 
 	@Trace
 	static Disposable directSchedule(ScheduledExecutorService exec, Runnable task, Disposable parent, long delay, TimeUnit unit) {

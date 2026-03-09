@@ -6,14 +6,15 @@ apply plugin: 'java'
 dependencies {
    implementation 'io.projectreactor:reactor-core:3.1.0.RELEASE'
 
-   // New Relic Labs Java Agent dependencies
-   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
-   implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
-   implementation fileTree(include: ['*.jar'], dir: '../libs')
-   
-   testImplementation('io.projectreactor:reactor-core:3.2.11.RELEASE')
-   testImplementation 'junit:junit:4.12'
-   testImplementation fileTree(include: ['*.jar'], dir: '../test-lib')
+    // New Relic Labs Java Agent dependencies
+    implementation 'com.newrelic.agent.java:newrelic-agent:8.14.0'
+    implementation 'com.newrelic.agent.java:newrelic-api:8.14.0'
+    implementation 'com.newrelic.agent.java:agent-bridge:8.14.0'
+    implementation 'com.newrelic.agent.java:agent-bridge-datastore:8.14.0'
+
+    testImplementation('io.projectreactor:reactor-core:3.2.11.RELEASE')
+    testImplementation 'junit:junit:4.12'
+    testImplementation fileTree(include: ['*.jar'], dir: '../test-lib')
 
 }
 
