@@ -6,20 +6,19 @@ import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.NewField;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
-import reactor.core.CorePublisher;
 
-@Weave(originalName = "reactor.core.publisher.NextProcessor")
-class NextProcessor_Instrumentation<O> {
+@Weave(originalName = "reactor.core.publisher.ReplayProcessor")
+public class ReplayProcessor_Instrumentation<T> {
 
     @NewField
-    private Token   token;
+    private Token token;
 
-    NextProcessor_Instrumentation(CorePublisher<? extends O> source) {
-        token = NewRelic.getAgent().getTransaction().getToken();
+    ReplayProcessor_Instrumentation(FluxReplay.ReplayBuffer<T> buffer) {
+
     }
 
     @Trace(async = true)
-    public Sinks.EmitResult tryEmitError(Throwable cause) {
+    public Sinks.EmitResult tryEmitComplete() {
         if(token != null) {
             token.linkAndExpire();
             token = null;
@@ -28,16 +27,19 @@ class NextProcessor_Instrumentation<O> {
     }
 
     @Trace(async = true)
-    public Sinks.EmitResult tryEmitValue(O value) {
-        token.linkAndExpire();
-        token = null;
+    public Sinks.EmitResult tryEmitError(Throwable t) {
+        if(token != null) {
+            token.linkAndExpire();
+            token = null;
+        }
         return Weaver.callOriginal();
     }
 
     @Trace(async = true)
-    public Sinks.EmitResult tryEmitEmpty() {
-        token.linkAndExpire();
-        token = null;
+    public Sinks.EmitResult tryEmitNext(T t) {
+        if(token != null) {
+            token.link();
+        }
         return Weaver.callOriginal();
     }
 }
