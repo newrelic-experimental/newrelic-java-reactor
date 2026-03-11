@@ -11,8 +11,8 @@ import com.nr.instrumentation.reactor.ReactorUtils;
 
 import reactor.core.Disposable;
 
-@Weave
-public class Schedulers {
+@Weave(originalName = "reactor.core.scheduler.Schedulers")
+public class Schedulers_Instrumentation {
 
 	@Trace
 	static Disposable directSchedule(ScheduledExecutorService exec, Runnable task, long delay, TimeUnit unit) {
@@ -20,7 +20,7 @@ public class Schedulers {
 		if(wrapper != null) {
 			task = wrapper;
 		}
-		
+
 		return Weaver.callOriginal();
 	}
 	

@@ -5,13 +5,6 @@ import com.newrelic.api.agent.Token;
 
 public class ReactorUtils {
 	
-	
-	public static boolean initialized = false;
-	
-	public static void initialize() {
-		initialized = true;		
-	}
-
 	public static NRRunnableWrapper getRunnableWrapper(Runnable r) {
 		if(r instanceof NRRunnableWrapper) {return null;}
 
