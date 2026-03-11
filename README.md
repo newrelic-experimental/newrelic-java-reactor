@@ -22,8 +22,6 @@ New Relic Java Agent instrumentation for the Reactor Framework (https://projectr
 ## Note on Reactor Finder   
 Reactor Finder has been removed and moved to its own repository.  To use Reactor Finder see https://github.com/newrelic-experimental/newrelic-java-reactor-finder
    
-## Transaction Views   
-The latest version has reverted to a single transaction by simplifying the code.  If you prefer the multiple transaction distributed tracing view of previous versions then use release 2.02.   
 ## Installation
    
 To install:

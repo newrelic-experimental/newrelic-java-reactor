@@ -19,7 +19,7 @@ class NextProcessor_Instrumentation<O> {
     }
 
     @Trace(async = true)
-    public Sinks.EmitResult tryEmitError(Throwable cause) {
+    Sinks.EmitResult tryEmitError(Throwable cause) {
         if(token != null) {
             token.linkAndExpire();
             token = null;
@@ -28,16 +28,10 @@ class NextProcessor_Instrumentation<O> {
     }
 
     @Trace(async = true)
-    public Sinks.EmitResult tryEmitValue(O value) {
+    Sinks.EmitResult tryEmitValue(O value) {
         token.linkAndExpire();
         token = null;
         return Weaver.callOriginal();
     }
 
-    @Trace(async = true)
-    public Sinks.EmitResult tryEmitEmpty() {
-        token.linkAndExpire();
-        token = null;
-        return Weaver.callOriginal();
-    }
 }
