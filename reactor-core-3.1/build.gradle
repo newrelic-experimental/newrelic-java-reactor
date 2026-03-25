@@ -7,10 +7,10 @@ dependencies {
    implementation 'io.projectreactor:reactor-core:3.1.0.RELEASE'
 
     // New Relic Labs Java Agent dependencies
-    implementation 'com.newrelic.agent.java:newrelic-agent:8.14.0'
-    implementation 'com.newrelic.agent.java:newrelic-api:8.14.0'
-    implementation 'com.newrelic.agent.java:agent-bridge:8.14.0'
-    implementation 'com.newrelic.agent.java:agent-bridge-datastore:8.14.0'
+    implementation 'com.newrelic.agent.java:newrelic-agent:9.1.0'
+    implementation 'com.newrelic.agent.java:newrelic-api:9.1.0'
+    implementation 'com.newrelic.agent.java:agent-bridge:9.1.0'
+    implementation 'com.newrelic.agent.java:agent-bridge-datastore:9.1.0'
 
     testImplementation('io.projectreactor:reactor-core:3.2.11.RELEASE')
     testImplementation 'junit:junit:4.12'

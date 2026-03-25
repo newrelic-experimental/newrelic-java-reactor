@@ -1,5 +1,6 @@
 package reactor.core.publisher;
 
+import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.NewField;
@@ -15,6 +16,10 @@ class UnicastManySinkNoBackpressure_Instrumentation<T> {
 
     @NewField
     private Token token;
+
+    UnicastManySinkNoBackpressure_Instrumentation() {
+        token = NewRelic.getAgent().getTransaction().getToken();
+    }
 
     @Trace(async = true)
     public Sinks.EmitResult tryEmitComplete() {
