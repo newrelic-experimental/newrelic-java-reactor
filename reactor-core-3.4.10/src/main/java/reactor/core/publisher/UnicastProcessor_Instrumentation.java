@@ -18,15 +18,21 @@ public class UnicastProcessor_Instrumentation<T> {
     private Token token;
 
     public UnicastProcessor_Instrumentation(Queue<T> queue) {
-
+        if(token == null) {
+            token = NewRelic.getAgent().getTransaction().getToken();
+        }
     }
 
     public UnicastProcessor_Instrumentation(Queue<T> queue, Disposable onTerminate) {
-
+        if(token == null) {
+            token = NewRelic.getAgent().getTransaction().getToken();
+        }
     }
 
     public UnicastProcessor_Instrumentation(Queue<T> queue, Consumer<? super T> onOverflow, Disposable onTerminate) {
-
+        if(token == null) {
+            token = NewRelic.getAgent().getTransaction().getToken();
+        }
     }
 
     @Trace(async = true)

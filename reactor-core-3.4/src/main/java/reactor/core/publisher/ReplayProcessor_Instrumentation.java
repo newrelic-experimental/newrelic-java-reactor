@@ -14,7 +14,7 @@ public class ReplayProcessor_Instrumentation<T> {
     private Token token;
 
     ReplayProcessor_Instrumentation(FluxReplay.ReplayBuffer<T> buffer) {
-
+        token = NewRelic.getAgent().getTransaction().getToken();
     }
 
     @Trace(async = true)

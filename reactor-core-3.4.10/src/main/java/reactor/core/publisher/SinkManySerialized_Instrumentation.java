@@ -1,5 +1,6 @@
 package reactor.core.publisher;
 
+import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.NewField;
@@ -13,7 +14,7 @@ class SinkManySerialized_Instrumentation<T> {
     private Token token;
 
     SinkManySerialized_Instrumentation(Sinks.Many<T> sink, ContextHolder contextHolder) {
-
+        this.token = NewRelic.getAgent().getTransaction().getToken();
     }
 
     @Trace(async = true)
