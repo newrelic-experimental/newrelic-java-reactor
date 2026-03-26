@@ -25,5 +25,5 @@ jar {
 }
 
 verifyInstrumentation {
-	passesOnly 'io.projectreactor:reactor-core:[3.3.0.RELEASE,)'
+	passesOnly 'io.projectreactor:reactor-core:[3.3.0.RELEASE,3.4.0)'
 }
