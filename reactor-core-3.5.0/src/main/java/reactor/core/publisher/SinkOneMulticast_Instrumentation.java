@@ -7,12 +7,8 @@ import com.newrelic.api.agent.weaver.Weaver;
 @Weave(originalName = "reactor.core.publisher.SinkOneMulticast")
 class SinkOneMulticast_Instrumentation<O> extends SinkEmptyMulticast_Instrumentation<O> {
 
-    @Trace(async=true)
+    @Trace
     public Sinks.EmitResult tryEmitValue(O value) {
-        if(token != null) {
-            token.linkAndExpire();
-            token = null;
-        }
         return Weaver.callOriginal();
 
     }
