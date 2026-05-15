@@ -1,23 +1,12 @@
 package reactor.core.publisher;
 
 import com.newrelic.api.agent.NewRelic;
-import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.instrumentation.reactor.ReactorConfig;
 
-@Weave(originalName = "reactor.core.publisher.NextProcessor")
-class NextProcessor_Instrumentation<O> {
-
-    @Trace
-    Sinks.EmitResult tryEmitError(Throwable cause) {
-        return Weaver.callOriginal();
-    }
-
-    @Trace
-    Sinks.EmitResult tryEmitValue(O value) {
-        return Weaver.callOriginal();
-    }
+@Weave(originalName = "reactor.core.publisher.DirectProcessor")
+public class DirectProcessor_Instrumentation {
 
     public void onError(Throwable t) {
         if(ReactorConfig.errorsEnabled) {
@@ -25,5 +14,4 @@ class NextProcessor_Instrumentation<O> {
         }
         Weaver.callOriginal();
     }
-
 }
