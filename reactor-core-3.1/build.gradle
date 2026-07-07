@@ -7,8 +7,8 @@ dependencies {
    implementation 'io.projectreactor:reactor-core:3.1.0.RELEASE'
 
     // New Relic Labs Java Agent dependencies
-    implementation 'com.newrelic.agent.java:newrelic-agent:9.1.0'
-    implementation 'com.newrelic.agent.java:newrelic-api:9.1.0'
+    implementation 'com.newrelic.agent.java:newrelic-agent:' + project.findProperty('java.agent.version')
+    implementation 'com.newrelic.agent.java:newrelic-api:' + project.findProperty('java.agent.version')
     implementation 'com.newrelic.agent.java:agent-bridge:9.1.0'
     implementation 'com.newrelic.agent.java:agent-bridge-datastore:9.1.0'
 
