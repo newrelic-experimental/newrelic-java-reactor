@@ -12,7 +12,7 @@ buildscript {
 
   dependencies {
     classpath 'gradle-templates:gradle-templates:1.5'
-    classpath 'com.newrelic.agent.java:gradle-verify-instrumentation-plugin:3.2'
+    classpath 'com.newrelic.agent.java:gradle-verify-instrumentation-plugin:4.0'
   }
 }
 
@@ -22,7 +22,7 @@ plugins {
 
 project.ext {
   group = 'com.newrelic.instrumentation.labs'
-  javaAgentVersion = '6.4.0'
+  javaAgentVersion = project.findProperty('java.agent.version')
 
   // Aligned with minimum Java major version supported by latest Java Agent
   javaVersion = JavaVersion.VERSION_1_8
